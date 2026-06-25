@@ -1,0 +1,77 @@
+{
+  "name": "hackathon-energetic",
+  "description": "High-energy palette for hackathon pitches. Dark blue accent, bright highlights, designed to grab attention in 6-slide format.",
+  "version": "1.0.0",
+  "colors": {
+    "primary": "#1E3A5F",
+    "primary_light": "#3B6BAA",
+    "accent": "#FF6B35",
+    "success": "#22C55E",
+    "warning": "#F59E0B",
+    "danger": "#EF4444",
+    "background": "#FFFFFF",
+    "surface": "#F9FAFB",
+    "text_primary": "#0F172A",
+    "text_secondary": "#475569"
+  },
+  "callouts": {
+    "key_metrics": {
+      "background": "#EFF6FF",
+      "border": "#1E3A5F",
+      "text": "#0F172A",
+      "use": "Key stats, success numbers"
+    },
+    "warning": {
+      "background": "#FEF2F2",
+      "border": "#EF4444",
+      "text": "#0F172A",
+      "use": "Risks, limitations"
+    },
+    "success": {
+      "background": "#F0FDF4",
+      "border": "#22C55E",
+      "text": "#0F172A",
+      "use": "Expected outcomes"
+    },
+    "info": {
+      "background": "#F1F5F9",
+      "border": "#475569",
+      "text": "#0F172A",
+      "use": "Methodology notes"
+    }
+  },
+  "typography": {
+    "heading_font": "Inter Bold",
+    "body_font": "Inter",
+    "code_font": "JetBrains Mono",
+    "title_size": "24pt",
+    "h1_size": "20pt",
+    "h2_size": "16pt",
+    "h3_size": "14pt",
+    "body_size": "11pt",
+    "code_size": "10pt"
+  },
+  "spacing": {
+    "paragraph": "1.15",
+    "heading_top": "20px",
+    "heading_bottom": "10px",
+    "section_gap": "30px"
+  },
+  "diagrams": {
+    "shape_fill": "#1E3A5F",
+    "shape_text": "#FFFFFF",
+    "edge_color": "#3B6BAA",
+    "edge_width": "2px",
+    "background": "#FFFFFF"
+  },
+  "best_for": [
+    "Hackathon pitch decks (6 slides)",
+    "Demo day presentations",
+    "Quick overviews where attention is the goal"
+  ],
+  "avoid_for": [
+    "Academic papers (use material-light or institutional)",
+    "Long-form reports (use IBM Carbon)",
+    "Documentation (use Material Light)"
+  ]
+}

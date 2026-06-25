@@ -1,0 +1,76 @@
+{
+  "name": "material-light",
+  "description": "Material Design-inspired light palette. Balanced, professional, works for academic and technical docs.",
+  "version": "1.0.0",
+  "colors": {
+    "primary": "#1976D2",
+    "primary_light": "#42A5F5",
+    "accent": "#FF4081",
+    "success": "#4CAF50",
+    "warning": "#FF9800",
+    "danger": "#F44336",
+    "background": "#FFFFFF",
+    "surface": "#F5F5F5",
+    "text_primary": "#212121",
+    "text_secondary": "#757575"
+  },
+  "callouts": {
+    "key_metrics": {
+      "background": "#E3F2FD",
+      "border": "#1976D2",
+      "text": "#212121",
+      "use": "Key stats, success numbers"
+    },
+    "warning": {
+      "background": "#FFEBEE",
+      "border": "#F44336",
+      "text": "#212121",
+      "use": "Risks, limitations"
+    },
+    "success": {
+      "background": "#E8F5E9",
+      "border": "#4CAF50",
+      "text": "#212121",
+      "use": "Expected outcomes"
+    },
+    "info": {
+      "background": "#FAFAFA",
+      "border": "#9E9E9E",
+      "text": "#212121",
+      "use": "Methodology notes"
+    }
+  },
+  "typography": {
+    "heading_font": "Roboto",
+    "body_font": "Roboto",
+    "code_font": "Roboto Mono",
+    "title_size": "22pt",
+    "h1_size": "18pt",
+    "h2_size": "14pt",
+    "h3_size": "12pt",
+    "body_size": "11pt",
+    "code_size": "10pt"
+  },
+  "spacing": {
+    "paragraph": "1.5",
+    "heading_top": "16px",
+    "heading_bottom": "8px",
+    "section_gap": "24px"
+  },
+  "diagrams": {
+    "shape_fill": "#1976D2",
+    "shape_text": "#FFFFFF",
+    "edge_color": "#42A5F5",
+    "edge_width": "1.5px",
+    "background": "#FFFFFF"
+  },
+  "best_for": [
+    "Academic papers",
+    "Technical documentation",
+    "Long-form reports"
+  ],
+  "avoid_for": [
+    "Hackathon pitches (too neutral)",
+    "Demo day (too restrained)"
+  ]
+}

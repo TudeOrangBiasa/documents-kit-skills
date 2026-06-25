@@ -1,0 +1,49 @@
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts
+*.docx
+*.pptx
+*.pdf
+*.drawio
+*.drawio.bak
+
+# Temp / cache
+*.tmp
+*.bak
+.cache/
+.scratch/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# OS-specific
+.DS_Store
+.Trash-*
+
+# Logs
+*.log
+
+# Generated diagrams (keep source, not output)
+*.drawio.png
+*.drawio.svg
+*.drawio.pdf
+
+# Personal
+*.local
+.env.local
