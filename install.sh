@@ -37,6 +37,7 @@ SKILLS=(
   "document-writing"
   "drawio"
   "humanizer"
+  "officecli"
 )
 
 echo "=== Install documents-kit-skills ==="

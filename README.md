@@ -2,15 +2,22 @@
 
 > Write documents the right way. Pre-writing preparation, smart tool routing, 5-phase workflow, zero AI slop, citations that actually exist, passes AI detectors.
 
-A **curated toolkit** of 3 coupled skills for AI-assisted document creation:
+A **curated toolkit** of 4 coupled skills for AI-assisted document creation:
 
 | Skill | Purpose |
 |-------|---------|
 | **document-writing** | Orchestrator. Workflow, decision rules, 30 anti-slop patterns, AI detection avoidance |
-| **drawio** | Diagram generation with style presets, auto-layout, smart routing |
+| **drawio** | Diagram generation with 5 style presets (semantic/AWS/Azure/Carbon/Nord) + 5 templates (C4/AWS/microservices/sequence) + routing/layout rules |
 | **humanizer** | 30-pattern anti-AI catalog for prose (general purpose) |
+| **officecli** | docx/pptx/xlsx manipulation via MCP (used by document-writing for PATH B + post-conversion fixes) |
 
-Plus utility tools (scan-assets, fix-pandoc-leaks, detection-audit), templates (IPB/IEEE/ACM/hackathon), and design presets.
+Plus utility tools (scan-assets, fix-pandoc-leaks, detection-audit, asset-validator, pdf-from-docx, doc-audit-pipeline), 5 diagram templates, 5 drawio style presets, and 2 doc-level presets.
+
+## External dependencies
+
+- **officecli** (MCP) — required for `.docx` manipulation, post-conversion fixes, validation. Install: https://github.com/iOfficeAI/officecli
+- **pandoc** — required for `md → docx` conversion. Install: `brew install pandoc` or `apt install pandoc`
+- **python3** (with python-docx) — fallback for fix-pandoc-leaks.sh. Install: `pip install python-docx`
 
 ## Why this toolkit
 
