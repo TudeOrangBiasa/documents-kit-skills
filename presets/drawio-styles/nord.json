@@ -1,0 +1,47 @@
+{
+  "name": "nord",
+  "description": "Nord-inspired minimal palette. Cool blues and grays, good for documentation, dark mode diagrams, technical writing.",
+  "version": "1.0.0",
+  "colors": {
+    "polar_night_0": "#2E3440",
+    "polar_night_1": "#3B4252",
+    "polar_night_2": "#434C5E",
+    "polar_night_3": "#4C566A",
+    "snow_storm_0": "#D8DEE9",
+    "snow_storm_1": "#E5E9F0",
+    "snow_storm_2": "#ECEFF4",
+    "frost_0": "#8FBCBB",
+    "frost_1": "#88C0D0",
+    "frost_2": "#81A1C1",
+    "frost_3": "#5E81AC",
+    "aurora_0": "#BF616A",
+    "aurora_1": "#D08770",
+    "aurora_2": "#EBCB8B",
+    "aurora_3": "#A3BE8C",
+    "aurora_4": "#B48EAD"
+  },
+  "shapes": {
+    "process": "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF4;strokeColor=#5E81AC;fontColor=#2E3440;",
+    "data": "shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#E5E9F0;strokeColor=#5E81AC;fontColor=#2E3440;",
+    "external": "rounded=1;whiteSpace=wrap;html=1;fillColor=#E5E9F0;strokeColor=#4C566A;dashed=1;fontColor=#2E3440;",
+    "success": "rounded=1;whiteSpace=wrap;html=1;fillColor=#A3BE8C;strokeColor=#5E81AC;fontColor=#2E3440;",
+    "warning": "rounded=1;whiteSpace=wrap;html=1;fillColor=#EBCB8B;strokeColor=#5E81AC;fontColor=#2E3440;",
+    "error": "rounded=1;whiteSpace=wrap;html=1;fillColor=#BF616A;strokeColor=#5E81AC;fontColor=#ECEFF4;",
+    "decision": "rhombus;whiteSpace=wrap;html=1;fillColor=#D08770;strokeColor=#5E81AC;fontColor=#2E3440;",
+    "neutral": "rounded=1;whiteSpace=wrap;html=1;fillColor=#E5E9F0;strokeColor=#4C566A;fontColor=#2E3440;"
+  },
+  "edges": {
+    "default": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;strokeColor=#4C566A;strokeWidth=1.5;",
+    "data_flow": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;strokeColor=#5E81AC;strokeWidth=2;",
+    "async": "endArrow=classic;html=1;rounded=1;dashed=1;orthogonalEdgeStyle=1;strokeColor=#4C566A;strokeWidth=1.5;"
+  },
+  "best_for": [
+    "Documentation-focused diagrams",
+    "Dark mode + light mode pair",
+    "Minimal/clean aesthetic",
+    "Open-source projects"
+  ],
+  "references": [
+    "https://www.nordtheme.com/"
+  ]
+}

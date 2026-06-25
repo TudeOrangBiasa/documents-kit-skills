@@ -1,0 +1,56 @@
+{
+  "name": "semantic",
+  "description": "De facto standard semantic palette for technical diagrams. Used in UML, ERD, BPMN, generic flowcharts.",
+  "version": "1.0.0",
+  "colors": {
+    "primary_fill": "#dae8fc",
+    "primary_stroke": "#6c8ebf",
+    "primary_text": "#0F172A",
+    "success_fill": "#d5e8d4",
+    "success_stroke": "#82b366",
+    "success_text": "#0F172A",
+    "warning_fill": "#fff2cc",
+    "warning_stroke": "#d6b656",
+    "warning_text": "#0F172A",
+    "error_fill": "#f8cecc",
+    "error_stroke": "#b85450",
+    "error_text": "#0F172A",
+    "neutral_fill": "#f5f5f5",
+    "neutral_stroke": "#666666",
+    "neutral_text": "#0F172A",
+    "external_fill": "#e1d5e7",
+    "external_stroke": "#9673a6",
+    "external_text": "#0F172A"
+  },
+  "shapes": {
+    "process": "rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+    "decision": "rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;",
+    "database": "shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;",
+    "start_end": "ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;",
+    "terminator": "ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;",
+    "external": "rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;dashed=1;",
+    "document": "shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f5f5f5;strokeColor=#666666;",
+    "actor": "shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;",
+    "io": "shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;",
+    "neutral": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;"
+  },
+  "edges": {
+    "default": "endArrow=classic;html=1;rounded=0;",
+    "orthogonal": "endArrow=classic;html=1;rounded=1;orthogonalLoop=1;jettySize=auto;orthogonalEdgeStyle=1;",
+    "dashed_async": "endArrow=classic;html=1;rounded=1;dashed=1;orthogonalEdgeStyle=1;",
+    "thick_critical": "endArrow=classic;html=1;rounded=1;strokeWidth=3;orthogonalEdgeStyle=1;",
+    "er_one": "endArrow=ERone;startArrow=ERminus;html=1;exitX=0;exitY=0.5;",
+    "er_many": "endArrow=ERmany;startArrow=ERone;html=1;exitX=0;exitY=0.5;",
+    "er_one_to_many": "startArrow=ERone;endArrow=ERmany;html=1;edgeStyle=entityRelationEdgeStyle;"
+  },
+  "best_for": [
+    "UML diagrams (class, activity, sequence, state)",
+    "ERD",
+    "BPMN 2.0",
+    "Generic flowcharts",
+    "Mixed-notation diagrams"
+  ],
+  "references": [
+    "https://github.com/github/awesome-copilot/blob/main/instructions/draw-io.instructions.md"
+  ]
+}

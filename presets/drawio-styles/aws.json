@@ -1,0 +1,69 @@
+{
+  "name": "aws",
+  "description": "AWS official palette for cloud architecture diagrams. Per-service category colors matching AWS icon library.",
+  "version": "1.0.0",
+  "colors": {
+    "compute_fill": "#FF9900",
+    "compute_stroke": "#C2770B",
+    "storage_fill": "#00A4A6",
+    "storage_stroke": "#008385",
+    "database_fill": "#C7131F",
+    "database_stroke": "#9F0F18",
+    "networking_fill": "#147EBA",
+    "networking_stroke": "#0F658F",
+    "security_fill": "#6CAA40",
+    "security_stroke": "#578833",
+    "analytics_fill": "#8C4FFF",
+    "analytics_stroke": "#7040CC",
+    "ai_ml_fill": "#C808D4",
+    "ai_ml_stroke": "#A006A9",
+    "management_fill": "#545B64",
+    "management_stroke": "#444A50",
+    "cloud_border": "#232F3E",
+    "cloud_fill": "#F2F3F3",
+    "text_primary": "#16191F",
+    "text_secondary": "#545B64"
+  },
+  "shapes": {
+    "aws_compute": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;strokeColor=#ffffff;",
+    "aws_lambda": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;strokeColor=#ffffff;",
+    "aws_s3": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;strokeColor=#ffffff;",
+    "aws_rds": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;strokeColor=#ffffff;",
+    "aws_dynamo": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;strokeColor=#ffffff;",
+    "aws_alb": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_load_balancing;strokeColor=#ffffff;",
+    "aws_cloudfront": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;strokeColor=#ffffff;",
+    "aws_sqs": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs;strokeColor=#ffffff;",
+    "aws_sns": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;strokeColor=#ffffff;",
+    "aws_eventbridge": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;strokeColor=#ffffff;",
+    "aws_ecs": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecs;strokeColor=#ffffff;",
+    "aws_eks": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eks;strokeColor=#ffffff;",
+    "aws_glue": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue;strokeColor=#ffffff;",
+    "aws_athena": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.athena;strokeColor=#ffffff;",
+    "aws_kinesis": "shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.kinesis;strokeColor=#ffffff;",
+    "aws_vpc_group": "shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#147EBA;fillColor=none;verticalAlign=top;fontColor=#147EBA;",
+    "aws_subnet_public": "shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc_subnet_public;strokeColor=#147EBA;fillColor=#E6F2FA;verticalAlign=top;fontColor=#147EBA;",
+    "aws_subnet_private": "shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc_subnet_private;strokeColor=#147EBA;fillColor=#FAFCFE;verticalAlign=top;fontColor=#147EBA;",
+    "aws_cloud_group": "shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#232F3E;fillColor=none;verticalAlign=top;fontColor=#232F3E;",
+    "generic_label": "text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;"
+  },
+  "edges": {
+    "aws_default": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;jettySize=auto;orthogonalLoop=1;strokeColor=#545B64;strokeWidth=2;",
+    "aws_async": "endArrow=classic;html=1;rounded=1;dashed=1;orthogonalEdgeStyle=1;jettySize=auto;orthogonalLoop=1;strokeColor=#545B64;strokeWidth=2;",
+    "aws_dataflow": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;jettySize=auto;orthogonalLoop=1;strokeColor=#147EBA;strokeWidth=3;"
+  },
+  "patterns": {
+    "aws_3_tier": "CloudFront → ALB → EC2/ECS (app tier) → RDS (data tier) + ElastiCache (caching) + S3 (static)",
+    "aws_microservices": "ALB → ECS services ↔ services (sync solid, async dashed via SQS/SNS) + per-service DB",
+    "aws_event_driven": "API Gateway → Lambda → SQS/SNS → Lambda → DynamoDB/S3, EventBridge fan-out",
+    "aws_data_pipeline": "Kinesis IoT → Firehose → S3 raw → Glue ETL → S3 curated → Athena"
+  },
+  "best_for": [
+    "AWS cloud architecture",
+    "Solution design documents",
+    "Well-Architected Framework reviews"
+  ],
+  "references": [
+    "https://aws.amazon.com/architecture/icons/",
+    "https://www.drawio.com/docs/diagram-types/aws-diagrams/"
+  ]
+}

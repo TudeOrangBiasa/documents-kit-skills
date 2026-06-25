@@ -1,0 +1,46 @@
+{
+  "name": "azure",
+  "description": "Azure official palette for cloud architecture diagrams. Microsoft-aligned colors and icon library.",
+  "version": "1.0.0",
+  "colors": {
+    "azure_blue": "#0072C6",
+    "compute_fill": "#FFB900",
+    "compute_stroke": "#CC9400",
+    "database_fill": "#0078D4",
+    "database_stroke": "#005FA9",
+    "networking_fill": "#00B7C3",
+    "networking_stroke": "#009099",
+    "security_fill": "#107C10",
+    "security_stroke": "#0C5F0C",
+    "storage_fill": "#004B87",
+    "storage_stroke": "#003B6C",
+    "primary_text": "#1C1C1C",
+    "secondary_text": "#605E5C"
+  },
+  "shapes": {
+    "azure_vm": "shape=mxgraph.azure.compute_vm;strokeColor=#0078D4;",
+    "azure_app_service": "shape=mxgraph.azure.app_services;strokeColor=#0078D4;",
+    "azure_functions": "shape=mxgraph.azure.functions;strokeColor=#0078D4;",
+    "azure_sql": "shape=mxgraph.azure.sql_database;strokeColor=#0078D4;",
+    "azure_cosmos": "shape=mxgraph.azure.cosmos_db;strokeColor=#0078D4;",
+    "azure_blob": "shape=mxgraph.azure.blob_storage;strokeColor=#0078D4;",
+    "azure_loadbalancer": "shape=mxgraph.azure.load_balancer;strokeColor=#0072C6;",
+    "azure_appgw": "shape=mxgraph.azure.application_gateway;strokeColor=#0072C6;",
+    "azure_vnet": "shape=mxgraph.azure.virtual_network;strokeColor=#0072C6;",
+    "azure_kubernetes": "shape=mxgraph.azure.kubernetes;strokeColor=#0078D4;",
+    "azure_resource_group": "rounded=0;whiteSpace=wrap;html=1;strokeColor=#0072C6;fillColor=none;dashed=1;verticalAlign=top;fontColor=#0072C6;",
+    "azure_subscription": "rounded=0;whiteSpace=wrap;html=1;strokeColor=#404040;fillColor=none;dashed=1;verticalAlign=top;fontColor=#404040;fontSize=14;"
+  },
+  "edges": {
+    "azure_default": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;strokeColor=#0072C6;strokeWidth=2;",
+    "azure_async": "endArrow=classic;html=1;rounded=1;dashed=1;orthogonalEdgeStyle=1;strokeColor=#0072C6;strokeWidth=2;"
+  },
+  "best_for": [
+    "Azure cloud architecture",
+    "Microsoft-centric enterprise",
+    "Solution design documents"
+  ],
+  "references": [
+    "https://www.drawio.com/docs/diagram-types/azure-diagrams/"
+  ]
+}

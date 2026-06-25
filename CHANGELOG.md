@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 Format: [version] - YYYY-MM-DD
 
+## [0.2.0] - 2026-06-25
+
+### Added — drawio enhancement
+- **5 drawio style presets** (`presets/drawio-styles/`):
+  - `semantic.json` — de facto standard palette (process/decision/database/etc)
+  - `aws.json` — AWS official per-service-category colors
+  - `azure.json` — Azure official palette
+  - `carbon.json` — IBM Carbon Design (10-step scales)
+  - `nord.json` — Nord-inspired cool minimal
+- **5 reusable diagram templates** (`diagrams/`):
+  - `c4-context.drawio` — C4 Level 1 (System Context) with actors + external systems
+  - `aws-3-tier.drawio` — CloudFront → ALB → EC2 → RDS + ElastiCache + S3
+  - `microservices.drawio` — API Gateway + 5 services + SNS (sync/async patterns)
+  - `sequence-template.drawio` — Generic UML sequence with 4 actors + return messages + notes
+  - `architecture.drawio` — (from 0.1.0) 3-tier client/api/db
+- **3 patterns to OpenViking**:
+  - `drawio-templates` — built-in libraries + palette + XML style format + patterns
+  - `diagram-visual-design` — Tufte + Gestalt principles, layout, routing, color, typography rules
+  - `diagram-types` — UML/BPMN/ERD/C4/ArchiMate standards + shape conventions
+
+### Rules added
+- Routing: orthogonal always, zero crossings, route around nodes
+- Layout: single flow direction (L2R or T2D), grid 8-10px, 20% whitespace
+- Color: max 3-4 semantic, WCAG 4.5:1, colorblind-safe
+- Typography: sans-serif 10pt min, sentence case, no overflow
+- Information density: 30-second test, decompose at 15-20 nodes
+
+### Provenance
+Scout research 2026-06-25 (3 parallel agents via exa MCP). Sources:
+- drawio.com official docs, jgraph/drawio-mcp, github/awesome-copilot
+- C4 model (Simon Brown), ArchiMate (Open Group), UML 2.5 (OMG), BPMN 2.0 (ISO/IEC 19510)
+- Tufte's "The Visual Display of Quantitative Information", IBM Design Language
+- AWS, Azure, GCP, IBM Cloud official icon libraries
+
 ## [0.1.0] - 2026-06-25
 
 ### Added

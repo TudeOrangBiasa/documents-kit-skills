@@ -1,0 +1,62 @@
+{
+  "name": "carbon",
+  "description": "IBM Carbon Design-inspired palette. Professional, restrained, suited for enterprise and B2B documentation.",
+  "version": "1.0.0",
+  "colors": {
+    "blue_10": "#def1ff",
+    "blue_20": "#b6e3ff",
+    "blue_30": "#80cfff",
+    "blue_40": "#47b3ff",
+    "blue_50": "#1f97ff",
+    "blue_60": "#0072c6",
+    "blue_70": "#0058a3",
+    "blue_80": "#003e7a",
+    "blue_90": "#002550",
+    "blue_100": "#000c26",
+    "gray_10": "#f3f3f3",
+    "gray_20": "#dfe4e6",
+    "gray_30": "#bcc3c7",
+    "gray_40": "#9aa1a7",
+    "gray_50": "#787d82",
+    "gray_60": "#5b6066",
+    "gray_70": "#3e444a",
+    "gray_80": "#22272e",
+    "gray_90": "#0b121c",
+    "gray_100": "#000000",
+    "red_50": "#fa6cbe",
+    "red_60": "#ee0033",
+    "red_70": "#c40030",
+    "green_50": "#24a148",
+    "green_60": "#198038",
+    "green_70": "#0e6027",
+    "yellow_30": "#fdd13a",
+    "yellow_50": "#f1c21b",
+    "yellow_60": "#d6a106",
+    "purple_60": "#8a3ffc"
+  },
+  "shapes": {
+    "process": "rounded=1;whiteSpace=wrap;html=1;fillColor=#def1ff;strokeColor=#0072c6;fontColor=#161616;",
+    "service": "rounded=1;whiteSpace=wrap;html=1;fillColor=#b6e3ff;strokeColor=#0058a3;fontColor=#161616;",
+    "database": "shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dfe4e6;strokeColor=#5b6066;fontColor=#161616;",
+    "external": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#787d82;dashed=1;fontColor=#161616;",
+    "decision": "rhombus;whiteSpace=wrap;html=1;fillColor=#fdd13a;strokeColor=#d6a106;fontColor=#161616;",
+    "warning": "rounded=1;whiteSpace=wrap;html=1;fillColor=#fdd13a;strokeColor=#d6a106;fontColor=#161616;",
+    "error": "rounded=1;whiteSpace=wrap;html=1;fillColor=#fa6cbe;strokeColor=#c40030;fontColor=#161616;",
+    "success": "rounded=1;whiteSpace=wrap;html=1;fillColor=#a7f0ba;strokeColor=#198038;fontColor=#161616;",
+    "neutral": "rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#5b6066;fontColor=#161616;"
+  },
+  "edges": {
+    "default": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;strokeColor=#5b6066;strokeWidth=1.5;",
+    "thick_critical": "endArrow=classic;html=1;rounded=1;orthogonalEdgeStyle=1;strokeColor=#0058a3;strokeWidth=3;",
+    "async": "endArrow=classic;html=1;rounded=1;dashed=1;orthogonalEdgeStyle=1;strokeColor=#5b6066;strokeWidth=1.5;"
+  },
+  "best_for": [
+    "Enterprise B2B documents",
+    "Long-form technical reports",
+    "Documentation sites",
+    "When professional/restrained is the goal"
+  ],
+  "references": [
+    "https://www.ibm.com/design/language/color/"
+  ]
+}
