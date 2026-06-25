@@ -1,53 +1,135 @@
 ---
-name: drawio-skill
-version: 1.14.0
-description: Use when the user requests diagrams, flowcharts, architecture diagrams, ER diagrams, UML / sequence / class diagrams, network topology, ML/DL model figures (Transformer/CNN/LSTM), mind maps, or any visualization. Also use proactively when explaining systems with 3+ components, complex data flows, or relationships that benefit from visual representation. Best suited when the diagram needs custom styling, rich shape vocabulary, swimlanes, or exportable images (PNG/SVG/PDF/JPG). Generates .drawio XML and exports locally via the native draw.io desktop CLI.
+name: drawio
+version: 2.0.0
+description: Generate `.drawio` diagrams with style presets (semantic, AWS, Azure, Carbon, Nord), reusable templates (C4, AWS 3-tier, microservices, sequence), and routing/layout rules (orthogonal, zero crossings, semantic color). Use when user requests architecture diagrams, flowcharts, ER/UML/BPMN/C4, network topology, or any visualization. Generates .drawio XML and exports to PNG/SVG/PDF via drawio desktop CLI.
 license: MIT
 homepage: https://github.com/Agents365-ai/drawio-skill
-compatibility: Requires draw.io desktop app CLI on PATH (macOS/Linux/Windows). Self-check step requires a vision-enabled model (e.g., Claude Sonnet/Opus); gracefully skipped if unavailable. Optional auto-layout (scripts/autolayout.py) needs Graphviz (dot).
+compatibility: Requires draw.io desktop app CLI on PATH. Auto-layout (scripts/autolayout.py) needs Graphviz.
 platforms: [macos, linux, windows]
-metadata: {"openclaw":{"requires":{"anyBins":["draw.io","drawio"]},"emoji":"📐","os":["darwin","linux","win32"],"install":[{"id":"brew-drawio","kind":"brew","formula":"drawio","bins":["drawio"],"label":"Install draw.io via Homebrew","os":["darwin"]},{"id":"brew-graphviz","kind":"brew","formula":"graphviz","bins":["dot"],"label":"Install Graphviz for optional autolayout.py","os":["darwin"],"optional":true}]},"hermes":{"tags":["drawio","diagram","flowchart","architecture","visualization","uml"],"category":"design","requires_tools":["drawio","draw.io"],"related_skills":["mermaid","excalidraw","plantuml"]},"author":"Agents365-ai","version":"1.14.0"}
 ---
 
-# Draw.io Diagrams
+# Draw.io Diagrams (Enhanced)
 
-## Overview
+## When to use
 
-Generate `.drawio` XML files and export to PNG/SVG/PDF/JPG locally using the native draw.io desktop app CLI.
+- Architecture, ER, UML, BPMN, C4, sequence diagrams, network topology, ML/DL figures
+- Anything needing precise styling, 10,000+ stock shapes, swimlanes, custom geometry
+- Output as editable PNG/SVG/PDF (use `-e` for embedded XML)
 
-**Supported formats:** PNG, SVG, PDF, JPG — no browser automation needed.
+## When NOT to use
 
-PNG, SVG, and PDF exports support `--embed-diagram` (`-e`) — the exported file contains the full diagram XML, so opening it in draw.io recovers the editable diagram. Use double extensions (`name.drawio.png`) to signal embedded XML.
+- Casual/hand-drawn look → excalidraw or tldraw
+- Diagrams-as-code in git/Markdown → mermaid (general) or plantuml (UML)
+- Freeform infinite canvas → tldraw
 
-## When to use / when NOT to use
-
-**Use this skill for:** polished, precise diagrams (architecture, network, strict UML, ERD), anything needing solid opaque fills, 10,000+ stock/branded shapes, swimlanes, or custom geometry, exported as editable PNG/SVG/PDF.
-
-**Do NOT use it — route elsewhere — for:**
-- A casual hand-drawn / whiteboard look → **excalidraw** or **tldraw**.
-- Diagrams-as-code that live in git / render in Markdown → **mermaid** (general) or **plantuml** (UML).
-- Freeform infinite-canvas sketching or freehand strokes → **tldraw**.
-
-See [REFERENCE.md](REFERENCE.md) for bundled resources table, prerequisites, workflow details (self-check, review loop, final export), XML structure, export commands, style presets, and diagram type presets.
-
-## Prerequisites (Quick)
+## Quick start
 
 ```bash
 brew install --cask drawio   # macOS
 drawio --version
+
+# Generate .drawio XML (use templates from diagrams/)
+cp diagrams/c4-context.drawio my-diagram.drawio
+# Edit in drawio or via XML
+
+# Export
+drawio -x -f png --width 2000 -o diagram.png diagram.drawio       # draft (no -e)
+drawio -x -f png --width 2000 -e -o diagram.drawio.png diagram.drawio  # final (with -e)
 ```
 
-Install from https://github.com/jgraph/drawio-desktop/releases if missing. Linux: avoid snap (AppArmor issue).
+## Style Presets (5 — `presets/drawio-styles/`)
 
-## Workflow
+| Preset | Best for | Apply when |
+|--------|----------|-----------|
+| `semantic.json` | UML, ER, BPMN, generic | Mixed-notation, no specific platform |
+| `aws.json` | AWS architecture | Cloud diagrams with AWS service icons |
+| `azure.json` | Azure architecture | Microsoft-centric, Azure services |
+| `carbon.json` | Enterprise B2B | IBM-style, restrained, professional |
+| `nord.json` | Documentation, dark/light pair | Minimal, open-source projects |
 
-1. Ask clarifying questions (type, format, location, scope)
-2. Resolve active preset → check user message, then `~/.drawio-skill/styles/`
-3. Check deps → resolve binary name, plan shapes/layout
-4. Generate .drawio XML (hand-place or autolayout for >15 nodes)
-5. Export draft PNG (`drawio -x -f png --width 2000 -o draft.png input.drawio` — NO `-e`)
-6. Self-check with vision (max 2 rounds)
-7. Review loop with user (targeted XML edits, re-export)
-8. Final export with `-e`, run `repair_png.py` for PNG
+**Use semantic palette by default** (de facto standard). Switch to AWS/Azure/Carbon/Nord when the user has a specific platform or aesthetic need.
 
-See [REFERENCE.md](REFERENCE.md) for full details on self-check tables, review loop rules, XML structure, export commands, style presets, and diagram type presets.
+## Diagram Templates (5 — `diagrams/`)
+
+| Template | Use when |
+|----------|----------|
+| `c4-context.drawio` | System as black box + actors + external systems (Level 1) |
+| `aws-3-tier.drawio` | CloudFront → ALB → EC2/ECS → RDS pattern |
+| `microservices.drawio` | API Gateway + per-service DB + async events via SNS |
+| `sequence-template.drawio` | Generic UML sequence with 4 actors + return messages |
+| `architecture.drawio` | 3-tier client/API/DB |
+
+**Copy template → edit → export.** Templates have the structure pre-built (groups, edges, style applied). You only fill in names and details.
+
+## Workflow (5 phases)
+
+1. **Clarify** — type, format, location, scope. Pick preset (semantic default).
+2. **Pick template** — copy from `diagrams/` if one matches, else generate from scratch.
+3. **Generate** — write .drawio XML. Apply style preset colors. Use shape conventions (rectangle=process, cylinder=DB, etc.).
+4. **Self-check** — export draft PNG, review with vision (max 2 rounds). Check routing, layout, text.
+5. **Final export** — `drawio -x -f png --width 2000 -e -o final.drawio.png final.drawio`
+
+## Diagram Type Decision Tree
+
+| Need | Notation | Template |
+|------|----------|----------|
+| Process flow with decisions | Flowchart | (generate) |
+| Static software structure | UML Class | (generate) |
+| Time-ordered messages | UML Sequence | `sequence-template.drawio` |
+| Workflow with parallel forks | UML Activity | (generate) |
+| State-based behavior | UML State Machine | (generate) |
+| User goals + system | UML Use Case | (generate) |
+| Deployable modules + interfaces | UML Component | (generate) |
+| Physical infrastructure | UML Deployment | (generate) |
+| Database schema | ERD (Crow's foot) | (generate) |
+| Business process orchestration | BPMN 2.0 | (generate) |
+| Software architecture (multi-level) | C4 | `c4-context.drawio` |
+| Cloud architecture (AWS) | AWS palette | `aws-3-tier.drawio` |
+| Microservices | Custom | `microservices.drawio` |
+| Enterprise architecture | ArchiMate | (generate) |
+
+## Core Rules (Quick Ref)
+
+| Rule | Reason |
+|------|--------|
+| **Orthogonal routing** (90° bends) | Eye follows paths; diagonals break grid flow |
+| **Zero crossings** | Every crossing = cognitive overhead |
+| **Single flow direction** (L2R or T2D) | Never mix |
+| **Grid 8-10px** | Snap all nodes, no stair-stepping |
+| **20% whitespace** | Don't cram; breathing room helps comprehension |
+| **3-4 semantic colors max** | Color for categorization, not decoration |
+| **Sans-serif 10pt min** | Readable when exported/screenshotted |
+| **Sentence case labels** | Consistency |
+| **30-second test** | Unfamiliar viewer traces path in ≤30s |
+| **Decompose at 15-20 nodes** | Sub-diagrams for complex systems |
+
+For full routing, layout, color, typography rules with examples, see [ENHANCEMENTS.md](ENHANCEMENTS.md).
+
+## Output Format Decisions
+
+| Format | Use | Notes |
+|--------|-----|-------|
+| **PNG** | Documents, slides, web | Use `-e` for editable |
+| **SVG** | Web, infinite zoom | Vector, smaller file |
+| **PDF** | Print, archive | Vector, high quality |
+| **JPG** | Email, small file | Lossy, avoid for diagrams with text |
+| **.drawio.png** | Editing + sharing | Embeds XML, double extension signals |
+
+## Common Pitfalls (Avoid)
+
+- ❌ Diagonal connectors → ✅ Orthogonal with `edgeStyle=orthogonalEdgeStyle`
+- ❌ Random element placement → ✅ Zone layout (input → process → output)
+- ❌ Rainbow colors → ✅ Max 3-4 semantic + legend
+- ❌ Vague labels ("Process 1") → ✅ Verb-noun ("Validate Payment")
+- ❌ Text overflow → ✅ Word wrap, padding 4-6px
+- ❌ Routing through nodes → ✅ Route in open space
+- ❌ Mixing flow directions → ✅ Pick L2R or T2D before drawing
+
+## Reference
+
+- [ENHANCEMENTS.md](ENHANCEMENTS.md) — full routing/layout/color/typography rules
+- [REFERENCE.md](REFERENCE.md) — XML structure, export commands, bundled resources
+- `presets/drawio-styles/` — 5 style presets
+- `diagrams/` — 5 reusable templates
+- [drawio.com docs](https://www.drawio.com/docs) — official documentation
+- [C4 model](https://c4model.com/) — Simon Brown's architecture notation
