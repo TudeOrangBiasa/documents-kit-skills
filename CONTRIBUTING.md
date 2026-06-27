@@ -5,6 +5,7 @@ Thanks for considering a contribution to documents-kit-skills. This toolkit help
 ## Principles
 
 1. **Skills follow write-a-skill principles**:
+
    - Description includes triggers ("Use when [specific keywords]")
    - SKILL.md under 500 lines (split into REFERENCE.md if larger)
    - No time-sensitive info
@@ -12,32 +13,34 @@ Thanks for considering a contribution to documents-kit-skills. This toolkit help
    - Concrete examples
    - References one level deep
    - Deterministic work in `scripts/`, not in skill prose
-
 2. **Cross-skill references by name, not path**:
+
    ```markdown
    See **drawio-skill** for diagram generation
    ```
+
    NOT
+
    ```markdown
    See [drawio-skill](~/.config/opencode/skills/drawio/SKILL.md)
    ```
-
 3. **Cross-skill utility tools in `tools/`**:
+
    - `doc-audit-pipeline.sh` — all audits
    - `asset-validator.sh` — check referenced assets
    - `pdf-from-docx.sh` — proper PDF export
    - If a script is used by 2+ skills, it goes in `tools/`
-
 4. **Skill-specific utility scripts in `skills/<name>/scripts/`**:
+
    - `skills/document-writing/scripts/detection-audit.sh` — anti-AI check
    - `skills/drawio/scripts/` — diagram-related
-
 5. **Presets and templates are data, not code**:
+
    - `presets/material-light.json` — design tokens
    - `templates/ipb-ppki.docx` — format template
    - Update without touching skill logic
 
-## Adding a new skill
+    ## Adding a new skill
 
 1. Create `skills/<name>/` with `SKILL.md` and `REFERENCE.md`
 2. Add to `install.sh` SKILLS array
@@ -62,6 +65,7 @@ Thanks for considering a contribution to documents-kit-skills. This toolkit help
 ## Testing
 
 Before submitting a PR:
+
 ```bash
 # Test install
 ./install.sh --dry-run
