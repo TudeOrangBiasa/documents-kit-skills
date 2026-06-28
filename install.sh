@@ -356,6 +356,14 @@ print('registered')
 # ── Step 5: Verify ────────────────────────────────────────────────
 
 verify() {
+  if [[ "$DRY_RUN" == "true" ]]; then
+    step "[5/5] Verifying (dry-run)"
+    info "[dry-run] would spawn scholar-paper-mcp via glue tool"
+    info "[dry-run] would list MCP tools and call export_session_bibtex"
+    ok "verify skipped (dry-run)"
+    return 0
+  fi
+
   step "[5/5] Verifying"
 
   local glue="$SCRIPT_DIR/tools/scholar_bibtex.py"
