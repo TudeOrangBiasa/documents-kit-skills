@@ -278,11 +278,22 @@ For full cookbook (7 tasks with bash), see [REFERENCE.md §15](REFERENCE.md).
    humanizer       drawio-skill      officecli
    (prose)         (diagrams)        (docx work)
         |                 |                 |
-   +----+----+           |                 |
-   |         |           |                 |
-   impeccable    pandoc (md→docx)    scout (citations)
-   (UI polish)                          |
-                                   explore (code)
+   +----+----+           |           +-----+-----+
+   |         |           |           |           |
+   impeccable    pandoc (md→docx)    scout    scholar-paper-mcp
+   (UI polish)                  (citations)  (Semantic Scholar)
+                                         |
+                                    explore (code)
+```
+
+### Scholar paper MCP (citation pipeline)
+
+Search papers → track in session → export BibTeX → Pandoc citeproc.
+
+```bash
+./tools/scholar_bibtex.py add my-session 10.1145/123456
+./tools/scholar_bibtex.py export my-session refs.bib
+pandoc doc.md -o doc.docx --citeproc --bibliography=refs.bib
 ```
 
 ## §19. Post-Conversion Fixes
