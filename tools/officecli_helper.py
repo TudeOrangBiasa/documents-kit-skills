@@ -41,7 +41,7 @@ def _check_input(path: Path) -> None:
 
 
 def _run_officecli(args: list[str], **kwargs: object) -> subprocess.CompletedProcess:
-    """Run officecli with args. Raises FileNotFoundError if binary missing."""
+    """Run officecli with args. Raises FileNotFoundError if binary missing, RuntimeError on timeout."""
     try:
         return subprocess.run(
             ["officecli", *args],
@@ -53,6 +53,8 @@ def _run_officecli(args: list[str], **kwargs: object) -> subprocess.CompletedPro
         )
     except FileNotFoundError:
         raise FileNotFoundError(OFFICECLI_MSG)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("officecli timeout after 30s")
 
 
 def _check_result(result: subprocess.CompletedProcess[str], label: str) -> None:
@@ -94,13 +96,16 @@ def apply_pandoc_fixes(path: Path, *, fixes: list[str] | None = None) -> None:
             flag = FIX_MAP.get(fix)
             if flag:
                 cmd.append(flag)
-    result = subprocess.run(
-        cmd,
-        check=False,
-        capture_output=True,
-        timeout=30,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            cmd,
+            check=False,
+            capture_output=True,
+            timeout=30,
+            text=True,
+        )
+    except subprocess.TimeoutExpired:
+        raise RuntimeError("fix-pandoc-leaks timeout after 30s")
     _check_result(result, "fix")
 
 
