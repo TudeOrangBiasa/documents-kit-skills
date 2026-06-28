@@ -1,0 +1,32 @@
+name: CI
+
+"on": [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v1
+        with:
+          python-version: "3.13"
+      - name: Cache uv packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock', 'tools/scholar_bibtex.py', 'tools/officecli_helper.py', 'tools/pandoc_citeproc.py') }}
+      - name: Run tests
+        run: uv run --with pytest --with pytest-asyncio --with "mcp[cli]" pytest tools/tests/
+
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v1
+      - name: Dry-run install
+        run: ./install.sh --all --dry-run
