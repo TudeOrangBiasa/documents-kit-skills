@@ -184,8 +184,8 @@ Copy-paste this prompt to install from zero:
 
 ```
 Install documents-kit-skills from https://github.com/TudeOrangBiasa/documents-kit-skills.
-Clone the repo, run `./install.sh --all`, and confirm all 5 skills plus the scholar-bibtex
-glue tool are working. Use uv for Python management.
+Clone the repo, run `./install.sh --all`, then run `./install.sh --verify` to confirm
+all 5 skills plus the scholar-bibtex glue tool are working. Use uv for Python management.
 ```
 
 ### Symlink install (development)

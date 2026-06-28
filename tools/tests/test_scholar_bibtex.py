@@ -24,10 +24,14 @@ def mock_stdio():
     stdio_cm = AsyncMock()
     stdio_cm.__aenter__.return_value = (read, write)
 
-    with patch("tools.scholar_bibtex.stdio_client", return_value=stdio_cm):
-        with patch("tools.scholar_bibtex.ClientSession") as mock_cls:
-            mock_cls.return_value.__aenter__.return_value = session
-            yield read, write, session
+    with (
+        patch("tools.scholar_bibtex.stdio_client", return_value=stdio_cm),
+        patch("tools.scholar_bibtex.ClientSession") as mock_cls,
+        patch("tools.scholar_bibtex.PEER_DIR") as mock_peer_dir,
+    ):
+        mock_peer_dir.exists.return_value = True
+        mock_cls.return_value.__aenter__.return_value = session
+        yield read, write, session
 
 
 @pytest.fixture
@@ -41,10 +45,27 @@ def _make_text_content(data: dict) -> TextContent:
     return TextContent(type="text", text=json.dumps({"data": data, "meta": {}}))
 
 
-def _make_result(content: list[TextContent]) -> MagicMock:
+def _make_result(content: list[TextContent], is_error: bool = False) -> MagicMock:
     result = MagicMock()
     result.content = content
+    result.isError = is_error
     return result
+
+
+# ── CLI tests ──────────────────────────────────────────────────────
+
+class TestCli:
+    def test_no_args_exits_nonzero(self):
+        from tools.scholar_bibtex import _build_parser
+
+        with pytest.raises(SystemExit):
+            _build_parser().parse_args([])
+
+    def test_unknown_subcommand_exits_nonzero(self):
+        from tools.scholar_bibtex import _build_parser
+
+        with pytest.raises(SystemExit):
+            _build_parser().parse_args(["bogus"])
 
 
 # ── export_bibtex tests ────────────────────────────────────────────
@@ -121,12 +142,24 @@ class TestExportBibtex:
         _, _, session = mock_stdio
         result = MagicMock()
         result.content = [TextContent(type="text", text="not valid json")]
+        result.isError = False
         session.call_tool.return_value = result
 
         from tools.scholar_bibtex import export_bibtex
 
-        with pytest.raises(ValueError, match="malformed"):
+        with pytest.raises(RuntimeError, match="malformed"):
             await export_bibtex("bad-session", temp_bib)
+
+    @pytest.mark.asyncio
+    async def test_timeout_raises_connection_error(self, mock_stdio, temp_bib):
+        _, _, session = mock_stdio
+        import asyncio
+        session.call_tool.side_effect = asyncio.TimeoutError()
+
+        from tools.scholar_bibtex import export_bibtex
+
+        with pytest.raises(ConnectionError, match="timeout"):
+            await export_bibtex("slow-session", temp_bib)
 
     @pytest.mark.asyncio
     async def test_server_down(self, temp_bib):
@@ -166,13 +199,23 @@ class TestAddPaper:
 
         from tools.scholar_bibtex import add_paper
 
-        with pytest.raises(RuntimeError, match="Paper not found"):
+        with pytest.raises(ConnectionError, match="Paper not found"):
             await add_paper("s1", "invalid-id")
 
 
 # ── list_papers tests ──────────────────────────────────────────────
 
 class TestListPapers:
+
+    @pytest.mark.asyncio
+    async def test_connection_error_when_peer_missing(self):
+        """PEER_DIR missing raises ConnectionError."""
+        with patch("tools.scholar_bibtex.PEER_DIR") as mock_peer:
+            mock_peer.exists.return_value = False
+            from tools.scholar_bibtex import list_papers
+
+            with pytest.raises(ConnectionError, match="not installed"):
+                await list_papers("s1")
 
     @pytest.mark.asyncio
     async def test_returns_dicts(self, mock_stdio):
@@ -198,8 +241,7 @@ class TestParseResponse:
     def test_strips_envelope(self):
         from tools.scholar_bibtex import _parse_response
 
-        result = MagicMock()
-        result.content = [_make_text_content(["a", "b"])]
+        result = _make_result([_make_text_content(["a", "b"])])
         assert _parse_response(result) == ["a", "b"]
 
     def test_empty_content_list(self):
@@ -207,14 +249,23 @@ class TestParseResponse:
 
         result = MagicMock()
         result.content = []
-        with pytest.raises(ValueError, match="empty"):
+        result.isError = False
+        with pytest.raises(RuntimeError, match="empty"):
+            _parse_response(result)
+
+    def test_parse_response_is_error(self):
+        from tools.scholar_bibtex import _parse_response
+
+        result = MagicMock()
+        result.isError = True
+        result.content = [TextContent(type="text", text="Paper not found in session")]
+        with pytest.raises(RuntimeError, match="Paper not found"):
             _parse_response(result)
 
     def test_missing_data_key(self):
         from tools.scholar_bibtex import _parse_response
 
         tc = TextContent(type="text", text=json.dumps({"meta": {}}))
-        result = MagicMock()
-        result.content = [tc]
-        with pytest.raises(ValueError, match="missing data"):
+        result = _make_result([tc])
+        with pytest.raises(RuntimeError, match="missing.*data"):
             _parse_response(result)

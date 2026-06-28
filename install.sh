@@ -202,15 +202,34 @@ install_skills() {
 peer_clone() {
   step "[3/5] Cloning peer deps"
 
-  if [[ ! -d "$PEER_DIR" ]]; then
-    info "cloning ${PEER_NAME}..."
-    run git clone "$PEER_REPO" "$PEER_DIR"
+  local clone_ok=false
+
+  if [[ -d "$PEER_DIR/.git" ]] && [[ -f "$PEER_DIR/.git/HEAD" ]]; then
+    # Healthy clone exists — update
+    info "peer dir exists, pulling latest"
+    if [[ "$DRY_RUN" != "true" ]] && (cd "$PEER_DIR" && git pull --ff-only 2>&1); then
+      clone_ok=true
+    elif [[ "$DRY_RUN" != "true" ]]; then
+      warn "git pull failed, recloning"
+      rm -rf "$PEER_DIR"
+    fi
+  else
+    # Missing or broken — clean and clone fresh
+    [[ -d "$PEER_DIR" ]] && rm -rf "$PEER_DIR"
+  fi
+
+  if [[ "$clone_ok" != "true" ]]; then
+    if [[ "$DRY_RUN" == "true" ]]; then
+      info "[dry-run] git clone ${PEER_REPO} ${PEER_DIR}"
+    else
+      info "cloning ${PEER_NAME}..."
+      if ! git clone "$PEER_REPO" "$PEER_DIR" 2>&1; then
+        err "git clone failed"
+        return 1
+      fi
+    fi
     ok "${PEER_NAME} → ${PEER_DIR}"
   else
-    info "${PEER_NAME} already cloned — pulling latest..."
-    if [[ "$DRY_RUN" != "true" ]]; then
-      (cd "$PEER_DIR" && git pull --ff-only)
-    fi
     ok "${PEER_NAME} — up to date"
   fi
 }
@@ -271,41 +290,50 @@ EOF
   # Ensure opencode config dir exists
   mkdir -p "$(dirname "$OPENCODE_JSON")"
 
-  local TMP_FILE
-  TMP_FILE=$(mktemp)
-
-  # Use python3 for safe JSON editing
+  # Use python3 for safe JSON editing with atomic write + backup
   python3 -c "
-import json, os
+import json, os, sys, tempfile
 
 config_path = '$OPENCODE_JSON'
 mcp_key = '$MCP_KEY'
+peer_dir = '$PEER_DIR'
 
-try:
+# Read existing config with backup
+if os.path.exists(config_path):
     with open(config_path) as f:
         config = json.load(f)
-except (FileNotFoundError, json.JSONDecodeError):
+    backup_path = config_path + '.bak'
+    with open(config_path) as orig, open(backup_path, 'w') as bak:
+        bak.write(orig.read())
+else:
     config = {}
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
 
-if 'mcpServers' not in config:
-    config['mcpServers'] = {}
-
-config['mcpServers'][mcp_key] = {
+# Modify
+config.setdefault('mcpServers', {})[mcp_key] = {
     'command': 'uv',
-    'args': ['--directory', '$PEER_DIR', 'run', 'scholar-paper-mcp']
+    'args': ['--directory', peer_dir, 'run', 'scholar-paper-mcp']
 }
 
-with open(config_path, 'w') as f:
-    json.dump(config, f, indent=2)
+# Atomic write via tempfile in same dir
+dir_name = os.path.dirname(config_path)
+fd, tmp_path = tempfile.mkstemp(dir=dir_name, suffix='.json')
+try:
+    with os.fdopen(fd, 'w') as f:
+        json.dump(config, f, indent=2)
+        f.write('\n')
+    os.replace(tmp_path, config_path)
+except Exception:
+    if os.path.exists(tmp_path):
+        os.unlink(tmp_path)
+    raise
 
 print('registered')
 " 2>&1 || {
     err "failed to register MCP server in ${OPENCODE_JSON}"
-    rm -f "$TMP_FILE"
     return 1
   }
 
-  rm -f "$TMP_FILE"
   ok "${MCP_KEY} → ${OPENCODE_JSON}"
 }
 
@@ -314,45 +342,50 @@ print('registered')
 verify() {
   step "[5/5] Verifying"
 
-  if [[ ! -d "$PEER_DIR" ]]; then
-    warn "peer not cloned — run './install.sh --peer-only' first"
+  local glue="$SCRIPT_DIR/tools/scholar_bibtex.py"
+  local verify_bib="/tmp/verify-sample-$$.bib"
+
+  # 1. Check peer dir exists and has .git
+  if [[ ! -d "$PEER_DIR/.git" ]]; then
+    err "peer dir missing or incomplete at ${PEER_DIR} — run './install.sh --peer-only' first"
     return 1
   fi
 
-  local VERIFY_BIB="/tmp/verify-sample.bib"
-
-  # Spawn server, list tools, verify 15 tools
-  info "spawning scholar-paper-mcp..."
-  local TOOL_COUNT
-  TOOL_COUNT=$(uv --directory "$PEER_DIR" run scholar-paper-mcp list-tools 2>/dev/null | grep -c "^  -" || true)
-
-  if [[ "$TOOL_COUNT" -eq 0 ]]; then
-    # Fallback: try non-pretty mode
-    TOOL_COUNT=$(uv --directory "$PEER_DIR" run scholar-paper-mcp list-tools 2>/dev/null | grep -c "^  -" || echo "0")
+  # 2. List MCP tools via glue tool's __list_tools__ command
+  info "spawning scholar-paper-mcp via glue tool..."
+  local tools_output
+  if ! tools_output=$(uv run --directory "$SCRIPT_DIR" "$glue" __list_tools__ 2>&1); then
+    err "MCP server not responsive: ${tools_output}"
+    return 1
   fi
 
-  if [[ "$TOOL_COUNT" -lt 10 ]]; then
-    warn "expected 15 tools, got ${TOOL_COUNT} — verify may fail"
+  # 3. Verify expected tools present
+  local tool_count
+  tool_count=$(echo "$tools_output" | grep -c "^\[tool\]" || true)
+  if [[ "$tool_count" -lt 15 ]]; then
+    err "expected at least 15 tools, got ${tool_count}"
+    return 1
   fi
-  ok "${TOOL_COUNT} tools listed"
+  ok "${tool_count} tools listed"
 
-  # Export empty session BibTeX
-  info "calling export_session_bibtex (empty session)..."
-  local PAPER_COUNT=0
-  uv --directory "$PEER_DIR" run scholar-paper-mcp export-session --session-id "__verify__" --output "$VERIFY_BIB" 2>/dev/null || {
-    # Try direct tool call
-    cat > /dev/null 2>&1
-  }
-
-  # Count entries in bib
-  if [[ -f "$VERIFY_BIB" ]]; then
-    PAPER_COUNT=$(grep -c "^@" "$VERIFY_BIB" 2>/dev/null || echo "0")
-    ok "sample.bib written (${PAPER_COUNT} papers) → ${VERIFY_BIB}"
-  else
-    # Write proof file anyway
-    echo "% verify: empty session — no papers" > "$VERIFY_BIB"
-    ok "sample.bib written (0 papers) → ${VERIFY_BIB}"
+  # 4. Call export with verify session
+  info "calling export_session_bibtex (verify session)..."
+  if ! uv run --directory "$SCRIPT_DIR" "$glue" export __verify_session__ "$verify_bib" 2>&1; then
+    err "export_session_bibtex failed"
+    rm -f "$verify_bib"
+    return 1
   fi
+
+  if [[ ! -f "$verify_bib" ]]; then
+    err "output .bib not written"
+    return 1
+  fi
+
+  local paper_count
+  paper_count=$(grep -c "^@" "$verify_bib" 2>/dev/null || echo "0")
+  rm -f "$verify_bib"
+  ok "sample.bib written (${paper_count} papers)"
+  return 0
 }
 
 # ── Uninstall ─────────────────────────────────────────────────────
