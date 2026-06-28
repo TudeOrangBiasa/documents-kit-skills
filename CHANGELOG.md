@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 Format: [version] - YYYY-MM-DD
 
+## [0.4.0] - 2026-06-28
+
+### Added
+- **Script intrusion detection** (check #9) in `detection-audit.sh` — detects CJK/Hangul/Arabic/Cyrillic/Thai/Devanagari intrusion in Latin-target documents. Closes #10.
+- 11 bash test fixtures in `skills/document-writing/tests/fixtures/detection/`
+- Bash test runner: `skills/document-writing/scripts/tests/test_detection_audit.sh`
+- `--target <bcp47>` flag for detection-audit.sh
+- Pandoc frontmatter `lang: <code>` convention documented in SKILL.md §1 + REFERENCE.md §1
+
+### Changed
+- SKILL.md §1 (Phase 0) updated: read source, set `lang:` in frontmatter
+- SKILL.md §18 (Integration Map) updated: detection-audit.sh now has 9 checks
+
+### Known limitations
+- Bilingual documents (Indonesian+Arabic Qur'anic quotes) will false-positive — workaround: move non-Latin quotes to separate file
+- Mathematical symbols (α, β, π) in scientific documents will false-positive for Latin target
+- Mixed-script words (e.g., Japanese name in Indonesian text) will false-positive
+- Inverse detection (target=cjk detecting Latin intrusion) deferred to v0.5
+
 ## [0.3.1] - 2026-06-28
 
 ### Added
