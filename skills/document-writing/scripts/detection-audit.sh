@@ -1,14 +1,44 @@
 #!/usr/bin/env bash
 # detection-audit.sh — Audit a draft for AI-detection patterns.
-# Usage: ./detection-audit.sh <draft.md>
+# Usage: ./detection-audit.sh [--target <bcp47>] <draft.md>
 # Exits 0 if all checks pass.
 # Exits 1 if any check fails.
 # Exits 2 if wrong usage.
 
 set -euo pipefail
 
+# Parse --target flag
+TARGET=""
+POSITIONAL=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --target)
+      [[ -z "${2:-}" ]] && { echo "Error: --target requires a value"; exit 2; }
+      TARGET="$2"
+      shift 2
+      ;;
+    --target=*)
+      TARGET="${1#*=}"
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [--target <bcp47>] <draft.md>"
+      exit 0
+      ;;
+    -*)
+      echo "Error: unknown option $1"
+      exit 2
+      ;;
+    *)
+      POSITIONAL+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${POSITIONAL[@]}"
+
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <draft.md>"
+  echo "Usage: $0 [--target <bcp47>] <draft.md>"
   exit 2
 fi
 
@@ -17,6 +47,17 @@ DRAFT="$1"
 if [[ ! -f "$DRAFT" ]]; then
   echo "Error: $DRAFT not found"
   exit 2
+fi
+
+# Auto-detect target from frontmatter if not provided via --target
+if [[ -z "$TARGET" ]]; then
+  TARGET=$(awk '/^---$/{c++;next} c==1 && /^lang:/{print $2; exit}' "$DRAFT")
+fi
+
+# Default target if still empty
+if [[ -z "$TARGET" ]]; then
+  echo "Warning: no target specified, defaulting to en" >&2
+  TARGET="en"
 fi
 
 WORD_COUNT=$(wc -w < "$DRAFT")
@@ -34,6 +75,96 @@ count_matches() {
   # Strip whitespace
   count=$(echo "$count" | tr -d '[:space:]')
   echo "${count:-0}"
+}
+
+# Check 9: Script intrusion detection
+# Detect non-Latin scripts in Latin-target documents
+check_script_intrusion() {
+  local file="$1"
+  local target="$2"
+  local LATIN_LANGS=("id" "en" "ms" "fr" "de" "es" "pt" "it" "nl" "vi")
+  local is_latin=0
+  local lang
+
+  for lang in "${LATIN_LANGS[@]}"; do
+    if [[ "$lang" == "$target" ]]; then
+      is_latin=1
+      break
+    fi
+  done
+
+  # Unmapped target: warn, treat as latin-like
+  if [[ $is_latin -eq 0 ]]; then
+    if [[ "$target" =~ ^[a-zA-Z][a-zA-Z0-9-]*$ ]]; then
+      echo "Warning: target '$target' not in v0.4 latin scope, defaulting to latin (inverse detection deferred to v0.5)" >&2
+      is_latin=1
+    else
+      echo "Skip: $file target=$target (non-latin detection deferred to v0.5)"
+      return 0
+    fi
+  fi
+
+  # Check dependencies
+  if ! command -v pandoc &>/dev/null; then
+    echo "Error: pandoc required for check #9 (apt install pandoc)"
+    return 2
+  fi
+  if ! command -v perl &>/dev/null; then
+    echo "Error: perl required for check #9 (apt install perl)"
+    return 2
+  fi
+
+  # Pre-process: strip code blocks and inline code, normalize with pandoc
+  local plain_text
+  plain_text=$(perl -0777 -pe '
+    s/```.*?```//sg;
+    s/~~~.*?~~~//sg;
+    s/`[^`]+`//g;
+  ' "$file" 2>/dev/null | pandoc --to plain 2>/dev/null) || {
+    echo "Error: pandoc failed on $file"
+    return 2
+  }
+
+  # Detect non-Latin Unicode blocks in plain text
+  local detections
+  detections=$(echo "$plain_text" | perl -CS -ne '
+    s{https?://\S+}{}g;
+    if (m/([\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{f900}-\x{faff}]+)/) {
+      my $s = substr($1, 0, 50); print "CJK\t$.\t$s\n"; next;
+    }
+    if (m/([\x{3040}-\x{309f}]+)/) {
+      my $s = substr($1, 0, 50); print "Hiragana\t$.\t$s\n"; next;
+    }
+    if (m/([\x{30a0}-\x{30ff}]+)/) {
+      my $s = substr($1, 0, 50); print "Katakana\t$.\t$s\n"; next;
+    }
+    if (m/([\x{ac00}-\x{d7af}\x{1100}-\x{11ff}]+)/) {
+      my $s = substr($1, 0, 50); print "Hangul\t$.\t$s\n"; next;
+    }
+    if (m/([\x{0600}-\x{06ff}\x{0750}-\x{077f}\x{08a0}-\x{08ff}]+)/) {
+      my $s = substr($1, 0, 50); print "Arabic\t$.\t$s\n"; next;
+    }
+    if (m/([\x{0400}-\x{04ff}]+)/) {
+      my $s = substr($1, 0, 50); print "Cyrillic\t$.\t$s\n"; next;
+    }
+    if (m/([\x{0e00}-\x{0e7f}]+)/) {
+      my $s = substr($1, 0, 50); print "Thai\t$.\t$s\n"; next;
+    }
+    if (m/([\x{0900}-\x{097f}]+)/) {
+      my $s = substr($1, 0, 50); print "Devanagari\t$.\t$s\n"; next;
+    }
+  ') || true
+
+  if [[ -z "$detections" ]]; then
+    echo "Pass: $file clean (target=$target)"
+    return 0
+  fi
+
+  echo "FAIL: Script intrusion (target=$target):"
+  while IFS=$'\t' read -r script_type line sample; do
+    echo "  Error: $file:$line contains $script_type text: \"$sample\""
+  done <<< "$detections"
+  return 1
 }
 
 echo "=== Audit: $DRAFT ==="
@@ -125,6 +256,16 @@ else
   echo "FAIL: Burstiness CoV < 30% (low sentence length variance)"
   FAIL=1
 fi
+
+# Check 9: Script intrusion
+echo
+echo "--- Check 9: Script Intrusion ---"
+check_script_intrusion "$DRAFT" "$TARGET" && rc=0 || rc=$?
+case $rc in
+  0) ;; # pass
+  1) FAIL=1 ;;
+  2) echo "Error: fatal — check #9 failed"; exit 2 ;;
+esac
 
 echo
 if [[ $FAIL -eq 0 ]]; then

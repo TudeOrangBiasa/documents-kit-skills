@@ -247,7 +247,12 @@ ls references.bib refs.bib     # bibliography
 ```
 
 ### Phase 2: Write Markdown
+Set `lang:` in frontmatter for script intrusion detection (check #9):
 ```markdown
+---
+lang: id
+---
+
 # Title
 Author Name. 2026. Paper Title. *Journal Name*.
 
