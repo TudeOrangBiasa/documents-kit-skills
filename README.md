@@ -252,7 +252,7 @@ uv run tools/scholar_bibtex.py list my-session
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Key principles:
+See [CONTRIBUTING.md](CONTRIBUTING.md). For **AI agents** working on this codebase, see [AGENTS.md](AGENTS.md) — mandatory rules on architecture (MCP vs CLI), TDD discipline, ponytail constraints, and anti-patterns to avoid. Key principles:
 - Skills should follow write-a-skill principles (description with triggers, <500 lines for SKILL.md, deterministic work in scripts/)
 - Cross-skill references should be by skill name, not absolute path
 - New tools should be in `tools/`, not duplicated across skills

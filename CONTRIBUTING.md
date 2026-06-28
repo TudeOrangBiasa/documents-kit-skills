@@ -2,6 +2,8 @@
 
 Thanks for considering a contribution to documents-kit-skills. This toolkit helps people write documents with AI assistance while avoiding AI slop.
 
+> **AI agents**: read [AGENTS.md](AGENTS.md) FIRST for mandatory rules on architecture (MCP vs CLI), TDD discipline, ponytail constraints, and anti-patterns to avoid. The rules there are grounded in real mistakes from v0.3.0/v0.3.1 development.
+
 ## Principles
 
 1. **Skills follow write-a-skill principles**:
