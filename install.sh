@@ -209,6 +209,12 @@ peer_clone() {
     info "peer dir exists, pulling latest"
     if [[ "$DRY_RUN" != "true" ]] && (cd "$PEER_DIR" && git pull --ff-only 2>&1); then
       clone_ok=true
+      # After pull, try to pull LFS objects
+      if command -v git-lfs &>/dev/null; then
+        (cd "$PEER_DIR" && git lfs pull 2>&1) || warn "git lfs pull failed after pull"
+      else
+        warn "git-lfs not installed — model will be missing"
+      fi
     elif [[ "$DRY_RUN" != "true" ]]; then
       warn "git pull failed, recloning"
       rm -rf "$PEER_DIR"
@@ -226,6 +232,12 @@ peer_clone() {
       if ! git clone "$PEER_REPO" "$PEER_DIR" 2>&1; then
         err "git clone failed"
         return 1
+      fi
+      # Pull LFS objects after clone
+      if command -v git-lfs &>/dev/null; then
+        (cd "$PEER_DIR" && git lfs pull 2>&1) || warn "git lfs pull failed after clone"
+      else
+        warn "git-lfs not installed — model will be missing"
       fi
     fi
     ok "${PEER_NAME} → ${PEER_DIR}"
@@ -246,15 +258,19 @@ peer_sync() {
   ok "uv sync complete"
 
   # Verify LFS model pulled
-  if [[ -f "${PEER_DIR}/models/me5/model.safetensors" ]]; then
-    MODEL_SIZE=$(du -h "${PEER_DIR}/models/me5/model.safetensors" | awk '{print $1}')
-    ok "mE5 model loaded (${MODEL_SIZE})"
-  elif ls "${PEER_DIR}/models/"* 2>/dev/null | head -1 > /dev/null; then
-    MODEL_PATH=$(ls "${PEER_DIR}/models/"* 2>/dev/null | head -1)
-    MODEL_SIZE=$(du -h "$MODEL_PATH" 2>/dev/null | awk '{print $1}')
-    ok "model loaded (${MODEL_SIZE:-unknown})"
+  if [[ -f "${PEER_DIR}/models/model_quantized.onnx" ]]; then
+    # Check if it's an LFS pointer (small) or actual file (large)
+    MODEL_SIZE_BYTES=$(stat -c%s "${PEER_DIR}/models/model_quantized.onnx" 2>/dev/null || echo "0")
+    if [[ "$MODEL_SIZE_BYTES" -lt 1000 ]]; then
+      warn "mE5 model is LFS pointer (${MODEL_SIZE_BYTES} bytes) — git lfs pull may have failed"
+    else
+      MODEL_SIZE=$(du -h "${PEER_DIR}/models/model_quantized.onnx" | awk '{print $1}')
+      ok "mE5 model loaded (${MODEL_SIZE})"
+    fi
+  elif [[ -f "${PEER_DIR}/models/tokenizer.json" ]]; then
+    warn "mE5 model missing but tokenizer present — git lfs pull may have failed"
   else
-    warn "no model found in ${PEER_DIR}/models/ — ensure git-lfs was pulled"
+    warn "no model files in ${PEER_DIR}/models/ — ensure git-lfs was installed and pulled"
   fi
 }
 
@@ -465,8 +481,13 @@ main() {
       install_skills
       peer_clone && peer_sync
       peer_mcp_register
-      verify || true
       print_summary
+      # Run verify LAST, after summary, so failure is clearly visible
+      if ! verify; then
+        EXIT=1
+        err "self-verify failed — install completed but not all components working"
+        err "run './install.sh --verify' to see details"
+      fi
       ;;
     skills)
       install_skills
@@ -480,7 +501,9 @@ main() {
       ;;
     verify)
       prereq_check || EXIT=$?
-      verify || true
+      if ! verify; then
+        EXIT=1
+      fi
       ;;
     uninstall)
       uninstall

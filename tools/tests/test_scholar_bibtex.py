@@ -202,6 +202,20 @@ class TestAddPaper:
         with pytest.raises(ConnectionError, match="Paper not found"):
             await add_paper("s1", "invalid-id")
 
+    @pytest.mark.asyncio
+    async def test_is_error_raises_runtime_error(self, mock_stdio):
+        """add_paper should raise RuntimeError when tool returns isError=True."""
+        _, _, session = mock_stdio
+        session.call_tool.return_value = _make_result(
+            [TextContent(type="text", text="paper not found: invalid_id")],
+            is_error=True,
+        )
+
+        from tools.scholar_bibtex import add_paper
+
+        with pytest.raises(RuntimeError, match="paper not found"):
+            await add_paper("test-session", "invalid_id")
+
 
 # ── list_papers tests ──────────────────────────────────────────────
 

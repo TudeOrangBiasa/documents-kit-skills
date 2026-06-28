@@ -120,7 +120,7 @@ async def export_bibtex(session_id: str, output_path: Path) -> int:
 
 
 async def add_paper(session_id: str, paper_id: str) -> None:
-    """Call add_paper_to_session. Raises ConnectionError on spawn failure or timeout."""
+    """Call add_paper_to_session. Raises ConnectionError on spawn/timeout, RuntimeError on MCP error."""
     _peer_check()
     server_params = StdioServerParameters(
         command="uv",
@@ -130,7 +130,7 @@ async def add_paper(session_id: str, paper_id: str) -> None:
         async with stdio_client(server_params) as (read, write):
             async with ClientSession(read, write) as session:
                 await session.initialize()
-                await _call_with_timeout(
+                result = await _call_with_timeout(
                     session,
                     "add_paper_to_session",
                     arguments={"session_id": session_id, "paper_id": paper_id},
@@ -139,6 +139,8 @@ async def add_paper(session_id: str, paper_id: str) -> None:
         raise
     except Exception as e:
         raise ConnectionError(f"add_paper failed: {e}") from e
+    # Surface MCP tool errors (isError=True)
+    _parse_response(result)
 
 
 async def list_papers(session_id: str) -> list[dict]:
