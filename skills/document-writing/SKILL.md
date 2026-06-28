@@ -60,6 +60,7 @@ Before drafting, confirm:
 - [ ] Purpose statement, target audience, scope boundaries
 - [ ] Format/template identified (IPB PPKI, IEEE, ACM, hackathon)
 - [ ] Citation style chosen, page limit + deadline
+- [ ] Source language detected, `lang:` set in frontmatter for script intrusion check
 
 **Run asset scan first:**
 ```bash
@@ -155,7 +156,8 @@ Full catalog: [REFERENCE.md §5](REFERENCE.md).
 
 Target scores: GPTZero < 15%, Originality.ai < 10%, Turnitin Human, Copyleaks Human.
 
-Run `./scripts/detection-audit.sh <doc.md>` — exits 0 on clean, 1 on fail.
+Run `./scripts/detection-audit.sh [--target <bcp47>] <doc.md>` — exits 0 on clean, 1 on fail, 2 on error.
+Check #9 (script intrusion) detects non-Latin scripts (CJK, Hangul, Arabic, Cyrillic, Thai, Devanagari) in Latin-target documents.
 
 ## §10. Code in Documents
 
@@ -285,6 +287,12 @@ For full cookbook (7 tasks with bash), see [REFERENCE.md §15](REFERENCE.md).
                                          |
                                     explore (code)
 ```
+
+### detection-audit.sh (9 checks)
+
+`scripts/detection-audit.sh` runs 9 checks:
+- Checks 1-8: AI-detection patterns (em dashes, banned vocab, transitions, etc.)
+- Check #9: Script intrusion — detects non-Latin Unicode blocks in Latin-target documents
 
 ### Scholar paper MCP (citation pipeline)
 
