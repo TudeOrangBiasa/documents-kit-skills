@@ -1,6 +1,11 @@
+---
+name: agents
+description: Mandatory rules for AI agents working on documents-kit-skills. Covers architecture (MCP server vs CLI vs bash), TDD discipline (red-green-refactor, mock boundaries), ponytail constraints (LOC limits, no premature abstractions), subprocess safety, GitHub issue planning, commit/PR formats, and 18 anti-patterns. Use when agent says agent, agents.md, conventions, rules, anti-pattern, TDD, ponytail, architecture, MCP, CLI, stdio_client, subprocess, or is about to write glue tools / install scripts / Docker tests.
+---
+
 # AGENTS.md — Rules for AI Agents Working on This Codebase
 
-> Lessons learned from v0.3.0 + v0.3.1 development. Every rule below is grounded in a real mistake an agent made (or could make). Follow them — no exceptions.
+> Every rule below is grounded in a real mistake an agent made during this codebase's polish phase. Follow them — no exceptions.
 
 ## 1. Architecture: know your tool type BEFORE picking a calling pattern
 
@@ -34,11 +39,14 @@
 
 ## 3. Ponytail: minimum viable, no premature abstractions
 
-- **Glue tool size**: 100-200 LOC. If you exceed, refactor or split.
-- **Helper extraction rule**: only when **3+ callers**. 1-2 callers = inline.
-- **No `BaseX` classes** unless polymorphism is real.
-- **No "just in case" features**. Defer to v0.4.0 explicitly in the issue's "Out of scope" section.
+Concrete criteria (any one of these fails → too much):
+
+- **Glue tool size**: 100-200 LOC. If exceeded, **split by use case** (e.g., separate `export_bibtex` from `add_paper`), **not by abstraction layer** (no `BaseExporter` class).
+- **Helper extraction rule**: only when **3+ callers** (rule of 3). 1-2 callers = inline.
+- **No `BaseX` classes** unless **2+ concrete subclasses share 3+ methods** that need overriding.
+- **No "just in case" features** (config knobs, plugin systems, retry logic without a known failure mode). Defer to the next version explicitly in the issue's "Out of scope" section.
 - **Composing > reimplementing**: if a tool exists (e.g., `officecli_helper.validate_docx`), import and use it. Don't write your own.
+- **No error handling for impossible cases**. If `parse_response` always returns a dict, don't catch `AttributeError` on `.get()`.
 
 ## 4. Process: orchestrator manual review is non-negotiable
 
@@ -117,7 +125,7 @@
   - Internal helpers (`_run_*`, `_check_*`)
   - argparse CLI in `main()`
   - `from __future__ import annotations`
-- Terse docblocks: 1 line each
+- **Docblocks**: 1 line each, no period at end, no marketing language. Example: `"""Run pandoc with --citeproc. Raises FileNotFoundError or RuntimeError."""`
 - Compose existing tools (`officecli_helper.validate_docx`, `fix-pandoc-leaks.sh`) — don't reimplement
 
 ## 10. GitHub issue planning (for agent or human contributors)
@@ -197,11 +205,13 @@ These were all caught in v0.3.0/v0.3.1 review. Do not do them again:
 
 ## 15. When in doubt, ask
 
-If you're unsure about:
-- Tool type (MCP vs CLI) — check upstream README
-- Calling pattern — see rule #1 table
-- Whether to extract a helper — wait for 3+ callers
-- Whether to defer to v0.4.0 — yes, defer
-- Issue scope — write tighter AC + longer "Out of scope"
+Ask the user (don't guess) when ANY of these is true:
 
-Don't guess. Don't assume. Check the rules first.
+- **Tool type unclear** (MCP server vs CLI vs bash) — check upstream README first, ask if still ambiguous
+- **Scope ambiguous** — issue could be 100 LOC or 1000 LOC, depends on interpretation
+- **Breaking change** — affects existing user-facing behavior, version bump needed
+- **Affects >2 files** — multi-file refactor or cross-skill change
+- **Performance trade-off** — speed vs memory vs readability
+- **Data loss risk** — drop table, force-push, delete branch without backup
+
+Don't ask for: bug fixes with clear AC, typo fixes, obvious refactors within scope of existing issue.
