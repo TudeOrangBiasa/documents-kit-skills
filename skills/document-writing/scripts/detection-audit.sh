@@ -51,7 +51,7 @@ fi
 
 # Auto-detect target from frontmatter if not provided via --target
 if [[ -z "$TARGET" ]]; then
-  TARGET=$(awk '/^---$/{c++;next} c==1 && /^lang:/{print $2; exit}' "$DRAFT")
+  TARGET=$(awk '/^---$/{c++;next} c==1 && /^lang:/{gsub(/["'"'"']/, "", $2); print $2; exit}' "$DRAFT")
 fi
 
 # Default target if still empty
@@ -114,7 +114,10 @@ check_script_intrusion() {
     return 2
   fi
 
-  # Pre-process: strip code blocks and inline code, normalize with pandoc
+  # Pre-process: strip fenced code blocks and inline code, then normalize with pandoc.
+  # Note: pandoc --to plain does NOT strip code blocks (it indents them), so we strip first.
+  # pandoc reflows paragraphs, so we cannot report original file line numbers.
+  # Output shows script type + sample text; user greps the source to locate.
   local plain_text
   plain_text=$(perl -0777 -pe '
     s/```.*?```//sg;
@@ -130,28 +133,28 @@ check_script_intrusion() {
   detections=$(echo "$plain_text" | perl -CS -ne '
     s{https?://\S+}{}g;
     if (m/([\x{4e00}-\x{9fff}\x{3400}-\x{4dbf}\x{f900}-\x{faff}]+)/) {
-      my $s = substr($1, 0, 50); print "CJK\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "CJK\t$s\n"; next;
     }
     if (m/([\x{3040}-\x{309f}]+)/) {
-      my $s = substr($1, 0, 50); print "Hiragana\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Hiragana\t$s\n"; next;
     }
     if (m/([\x{30a0}-\x{30ff}]+)/) {
-      my $s = substr($1, 0, 50); print "Katakana\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Katakana\t$s\n"; next;
     }
     if (m/([\x{ac00}-\x{d7af}\x{1100}-\x{11ff}]+)/) {
-      my $s = substr($1, 0, 50); print "Hangul\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Hangul\t$s\n"; next;
     }
     if (m/([\x{0600}-\x{06ff}\x{0750}-\x{077f}\x{08a0}-\x{08ff}]+)/) {
-      my $s = substr($1, 0, 50); print "Arabic\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Arabic\t$s\n"; next;
     }
     if (m/([\x{0400}-\x{04ff}]+)/) {
-      my $s = substr($1, 0, 50); print "Cyrillic\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Cyrillic\t$s\n"; next;
     }
     if (m/([\x{0e00}-\x{0e7f}]+)/) {
-      my $s = substr($1, 0, 50); print "Thai\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Thai\t$s\n"; next;
     }
     if (m/([\x{0900}-\x{097f}]+)/) {
-      my $s = substr($1, 0, 50); print "Devanagari\t$.\t$s\n"; next;
+      my $s = substr($1, 0, 50); print "Devanagari\t$s\n"; next;
     }
   ') || true
 
@@ -161,8 +164,8 @@ check_script_intrusion() {
   fi
 
   echo "FAIL: Script intrusion (target=$target):"
-  while IFS=$'\t' read -r script_type line sample; do
-    echo "  Error: $file:$line contains $script_type text: \"$sample\""
+  while IFS=$'\t' read -r script_type sample; do
+    echo "  Error: $file contains $script_type text: \"$sample\""
   done <<< "$detections"
   return 1
 }

@@ -13,11 +13,18 @@ run_test() {
   local fixture="$1"
   local expected_exit="$2"
   local target="${3:-}"
+  local use_equals="${4:-}"  # "equals" to use --target=value syntax
   local tmpfile
   tmpfile=$(mktemp --suffix=.md)
   cp "${FIXTURES}/${fixture}" "$tmpfile"
   local args=("$tmpfile")
-  [[ -n "$target" ]] && args+=("--target" "$target")
+  if [[ -n "$target" ]]; then
+    if [[ "$use_equals" == "equals" ]]; then
+      args+=("--target=$target")
+    else
+      args+=("--target" "$target")
+    fi
+  fi
   set +e
   "$AUDIT" "${args[@]}" >/dev/null 2>&1
   local actual=$?
@@ -43,5 +50,6 @@ run_test url-idn.md 0 en
 run_test emoji-mixed.md 0 en
 run_test inline-code-zh.md 0 en
 run_test mixed-id-en-loanwords.md 0 id
+run_test pure-en.md 0 en equals  # test --target=value syntax
 
-echo "[ok] all 10 tests passed"
+echo "[ok] all 11 tests passed"
