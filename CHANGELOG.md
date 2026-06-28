@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 Format: [version] - YYYY-MM-DD
 
+## [0.3.1] - 2026-06-28
+
+### Added
+- **`tools/officecli_helper.py`** — Python interface for common officecli operations (validate, screenshot, apply_pandoc-fixes). Subprocess-based, mirrors scholar_bibtex.py structure. Closes #3.
+- **`tools/pandoc_citeproc.py`** — Chains `pandoc --citeproc` + `fix-pandoc-leaks.sh` + `officecli_helper.validate_docx` into one call. Closes #4.
+- **`tools/tests/integration/test_install_fresh.sh`** — Docker-based end-to-end test for `install.sh --all` in `python:3.13-slim`. Closes #2.
+- **`.github/workflows/ci.yml`** — GitHub Actions: `test` (pytest) + `dry-run` (install.sh) jobs. Closes #5.
+- **`AGENTS.md`** — Mandatory rules for AI agents (architecture, TDD, ponytail, 18 anti-patterns).
+
+### Changed
+- `install.sh` polish: verify failure now propagates exit code (no `|| true` masking)
+- README + CONTRIBUTING link to AGENTS.md
+
+### Out of scope (deferred to v0.3.2+)
+- Stale `docs/ARCHITECTURE.md`, `QUICKSTART.md`, `COMMON_TASKS.md`, `DECISIONS.md` (pre-v0.3.0 content)
+- Multi-OS CI matrix
+- PyPI publish of glue tools
+
 ## [0.3.0] - 2026-06-28
 
 ### Added
