@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 Format: [version] - YYYY-MM-DD
 
+## [0.3.0] - 2026-06-28
+
+### Added
+- **scholar-paper-mcp** as 5th peer dependency (MCP server for Semantic Scholar)
+- `tools/scholar_bibtex.py` — glue tool for citation pipeline (BibTeX export, paper tracking)
+- `install.sh --all` — agent-friendly install with prereq check, peer clone, MCP registration, self-verify
+- `install.sh --verify` and `--uninstall` flags
+- Auto-install of Python 3.13 via `uv python install` if missing
+
+### Changed
+- `install.sh` rewritten for non-interactive, idempotent, self-verifying agent use
+- Default install path: `~/.local/share/documents-kit-skills/peer/`
+- README adds "Install for AI agents" section with copy-paste prompt
+
+### Requirements
+- **Python >=3.13 required** (scholar-paper-mcp hard requirement)
+- **uv** required (replaces pip for this kit)
+- **git-lfs** required for mE5 model bundle
+
 ## [0.2.0] - 2026-06-25
 
 ### Added — drawio enhancement

@@ -2,7 +2,7 @@
 
 > Write documents the right way. Pre-writing preparation, smart tool routing, 5-phase workflow, zero AI slop, citations that actually exist, passes AI detectors.
 
-A **curated toolkit** of 4 coupled skills for AI-assisted document creation:
+A **curated toolkit** of 5 coupled skills for AI-assisted document creation:
 
 | Skill | Purpose |
 |-------|---------|
@@ -10,38 +10,49 @@ A **curated toolkit** of 4 coupled skills for AI-assisted document creation:
 | **drawio** | Diagram generation with 5 style presets (semantic/AWS/Azure/Carbon/Nord) + 5 templates (C4/AWS/microservices/sequence) + routing/layout rules |
 | **humanizer** | 30-pattern anti-AI catalog for prose (general purpose) |
 | **officecli** | docx/pptx/xlsx manipulation via MCP (used by document-writing for PATH B + post-conversion fixes) |
+| **scholar-paper-mcp** | Semantic Scholar citation pipeline — search, track in session, export BibTeX, Pandoc citeproc |
 
-Plus utility tools (scan-assets, fix-pandoc-leaks, detection-audit, asset-validator, pdf-from-docx, doc-audit-pipeline), 5 diagram templates, 5 drawio style presets, and 2 doc-level presets.
+Plus utility tools (scan-assets, fix-pandoc-leaks, detection-audit, asset-validator, pdf-from-docx, doc-audit-pipeline, scholar-bibtex), 5 diagram templates, 5 drawio style presets, and 2 doc-level presets.
 
 ## External dependencies
 
 - **officecli** (MCP) — required for `.docx` manipulation, post-conversion fixes, validation. Install: https://github.com/iOfficeAI/officecli
+- **scholar-paper-mcp** (MCP) — Semantic Scholar citation pipeline. Installed automatically by `install.sh` as a peer dep.
 - **pandoc** — required for `md → docx` conversion. Install: `brew install pandoc` or `apt install pandoc`
-- **python3** (with python-docx) — fallback for fix-pandoc-leaks.sh. Install: `pip install python-docx`
+- **python3 >=3.13** (with uv) — required for scholar-paper-mcp and glue tools. Auto-installed by `install.sh` if missing.
+- **git-lfs** — required for mE5 model bundle in scholar-paper-mcp.
 
 ## Why this toolkit
 
-These 3 skills are coupled:
-- `document-writing` references drawio (for diagrams) and humanizer (for prose rewrite)
+These 5 skills are coupled:
+- `document-writing` references drawio (for diagrams), humanizer (for prose rewrite), and scholar-paper-mcp (for citations)
 - `drawio` produces visuals that `document-writing` integrates
 - `humanizer` is the canonical anti-AI catalog that `document-writing` specializes for academic/technical docs
+- `scholar-paper-mcp` provides real citation data that feeds document-writing's citation workflow
 
 Developing them together keeps references in sync, ensures consistent conventions, and enables end-to-end workflows.
 
 ## Quick start
 
 ```bash
-# Install all 3 skills
+# Install all 5 skills + peer deps + MCP registration + self-verify
 ./install.sh
 
-# Verify
-ls ~/.config/opencode/skills/document-writing ~/.config/opencode/skills/drawio ~/.config/opencode/skills/humanizer
+# Or step by step:
+./install.sh --skills-only   # only local skills
+./install.sh --peer-only     # only peer deps + MCP registration
+./install.sh --verify        # self-verify
+
+# Verify install
+ls ~/.config/opencode/skills/{document-writing,drawio,humanizer,officecli}
+ls -d ~/.local/share/documents-kit-skills/peer/scholar-paper-mcp
 ```
 
 Then in any conversation:
 - "Write a hackathon proposal for [topic]" → document-writing loads
 - "Generate an architecture diagram" → drawio loads
 - "Humanize this paragraph" → humanizer loads
+- "Search papers on transformer attention and export BibTeX" → scholar-paper-mcp
 
 ## Architecture
 
@@ -53,11 +64,12 @@ Then in any conversation:
    humanizer       drawio-skill      officecli
    (prose)         (diagrams)        (docx work)
         |                 |                 |
-   +----+----+           |                 |
-   |         |           |                 |
-   impeccable    pandoc (md→docx)    scout (citations)
-   (UI polish)                          |
-                                   explore (code)
+   +----+----+           |           +-----+-----+
+   |         |           |           |           |
+   impeccable    pandoc (md→docx)    scout    scholar-paper-mcp
+   (UI polish)                  (citations)  (Semantic Scholar)
+                                         |
+                                    explore (code)
 ```
 
 **Why document-writing is the orchestrator** (Hayes 2012 + Scriptorium):
@@ -75,9 +87,9 @@ documents-kit-skills/
 ├── LICENSE
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
-├── install.sh                       # symlink installer
+├── install.sh                       # agent-friendly installer (--all, --verify, --uninstall)
 ├── skills/
-│   ├── document-writing/             # the orchestrator
+│   ├── document-writing/             # the orchestrator (5-phase workflow)
 │   │   ├── SKILL.md
 │   │   ├── REFERENCE.md
 │   │   └── scripts/
@@ -91,13 +103,17 @@ documents-kit-skills/
 │   │   ├── references/
 │   │   ├── scripts/
 │   │   └── styles/
-│   └── humanizer/                   # the prose rewriter
-│       ├── SKILL.md
-│       └── REFERENCE.md
+│   ├── humanizer/                   # the prose rewriter
+│   │   ├── SKILL.md
+│   │   └── REFERENCE.md
+│   └── officecli/                   # the docx/pptx/xlsx tool (PATH B)
 ├── tools/                           # cross-skill utilities
 │   ├── doc-audit-pipeline.sh        # all audits in one command
 │   ├── asset-validator.sh
-│   └── pdf-from-docx.sh
+│   ├── pdf-from-docx.sh
+│   ├── scholar_bibtex.py            # citation pipeline glue (PEP 723, MCP client)
+│   └── tests/
+│       └── test_scholar_bibtex.py   # glue tool tests (MCP SDK mocked)
 ├── templates/                        # format templates
 │   ├── ipb-ppki.docx
 │   ├── ieee-conference.docx
@@ -164,12 +180,33 @@ See `humanizer` skill. Workflow: scan for 30 patterns → rewrite by meaning (no
 
 ## Installation
 
+### Install for AI agents
+
+Copy-paste this prompt to install from zero:
+
+```
+Install documents-kit-skills from https://github.com/TudeOrangBiasa/documents-kit-skills.
+Clone the repo, run `./install.sh --all`, then run `./install.sh --verify` to confirm
+all 5 skills plus the scholar-bibtex glue tool are working. Use uv for Python management.
+```
+
 ### Symlink install (development)
 
 ```bash
-./install.sh
+./install.sh --skills-only
 # Creates symlinks in ~/.config/opencode/skills/
 # Re-run after changes to pick up updates
+```
+
+### Full install (all skills + peer deps)
+
+```bash
+./install.sh --all
+# 1. Prerequisite check (git, uv, git-lfs, python 3.13)
+# 2. Install 4 local skills
+# 3. Clone + sync scholar-paper-mcp
+# 4. Register MCP server in opencode.json
+# 5. Self-verify (list tools, export BibTeX)
 ```
 
 ### Copy install (production)
@@ -182,7 +219,35 @@ SKILLS_TARGET=~/.config/opencode/skills ./install.sh --copy
 ### Verify install
 
 ```bash
-ls -la ~/.config/opencode/skills/ | grep -E "document-writing|drawio|humanizer"
+./install.sh --verify
+# Or manually:
+# 4 local skills
+ls ~/.config/opencode/skills/{document-writing,drawio,humanizer,officecli}
+# 1 peer dep (MCP server, not a skill per se)
+ls -d ~/.local/share/documents-kit-skills/peer/scholar-paper-mcp
+```
+
+### Uninstall
+
+```bash
+./install.sh --uninstall
+# Removes skills symlinks, peer deps, and MCP registration
+```
+
+### Peer dependencies
+
+`install.sh --all` installs one peer dependency:
+
+| Peer | Purpose | Cloned to |
+|------|---------|-----------|
+| **scholar-paper-mcp** | Semantic Scholar MCP server — search, track, export BibTeX | `~/.local/share/documents-kit-skills/peer/scholar-paper-mcp/` |
+
+The glue tool `tools/scholar_bibtex.py` (PEP 723, no shell wrapper) wraps this MCP server for CLI use:
+
+```bash
+uv run tools/scholar_bibtex.py add my-session 10.1145/123456
+uv run tools/scholar_bibtex.py export my-session refs.bib
+uv run tools/scholar_bibtex.py list my-session
 ```
 
 ## Contributing
