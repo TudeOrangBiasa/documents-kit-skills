@@ -43,8 +43,9 @@ Developing them together keeps references in sync, ensures consistent convention
 ./install.sh --peer-only     # only peer deps + MCP registration
 ./install.sh --verify        # self-verify
 
-# Verify skills installed
-ls ~/.config/opencode/skills/document-writing ~/.config/opencode/skills/drawio ~/.config/opencode/skills/humanizer ~/.config/opencode/skills/officecli
+# Verify install
+ls ~/.config/opencode/skills/{document-writing,drawio,humanizer,officecli}
+ls -d ~/.local/share/documents-kit-skills/peer/scholar-paper-mcp
 ```
 
 Then in any conversation:
@@ -86,9 +87,9 @@ documents-kit-skills/
 ├── LICENSE
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
-├── install.sh                       # symlink installer
+├── install.sh                       # agent-friendly installer (--all, --verify, --uninstall)
 ├── skills/
-│   ├── document-writing/             # the orchestrator
+│   ├── document-writing/             # the orchestrator (5-phase workflow)
 │   │   ├── SKILL.md
 │   │   ├── REFERENCE.md
 │   │   └── scripts/
@@ -102,14 +103,15 @@ documents-kit-skills/
 │   │   ├── references/
 │   │   ├── scripts/
 │   │   └── styles/
-│   └── humanizer/                   # the prose rewriter
-│       ├── SKILL.md
-│       └── REFERENCE.md
+│   ├── humanizer/                   # the prose rewriter
+│   │   ├── SKILL.md
+│   │   └── REFERENCE.md
+│   └── officecli/                   # the docx/pptx/xlsx tool (PATH B)
 ├── tools/                           # cross-skill utilities
 │   ├── doc-audit-pipeline.sh        # all audits in one command
 │   ├── asset-validator.sh
 │   ├── pdf-from-docx.sh
-│   ├── scholar_bibtex.py            # citation pipeline glue (PEP 723, --verify)
+│   ├── scholar_bibtex.py            # citation pipeline glue (PEP 723, MCP client)
 │   └── tests/
 │       └── test_scholar_bibtex.py   # glue tool tests (MCP SDK mocked)
 ├── templates/                        # format templates
@@ -219,7 +221,10 @@ SKILLS_TARGET=~/.config/opencode/skills ./install.sh --copy
 ```bash
 ./install.sh --verify
 # Or manually:
-ls -la ~/.config/opencode/skills/ | grep -E "document-writing|drawio|humanizer|officecli"
+# 4 local skills
+ls ~/.config/opencode/skills/{document-writing,drawio,humanizer,officecli}
+# 1 peer dep (MCP server, not a skill per se)
+ls -d ~/.local/share/documents-kit-skills/peer/scholar-paper-mcp
 ```
 
 ### Uninstall
