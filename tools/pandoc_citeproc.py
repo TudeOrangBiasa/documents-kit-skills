@@ -18,6 +18,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 FIX_SCRIPT = SCRIPT_DIR / "skills" / "document-writing" / "scripts" / "fix-pandoc-leaks.sh"
 PANDOC_MSG = "pandoc not found — install via apt install pandoc or brew install pandoc"
+FIX_SCRIPT_MSG = "fix-pandoc-leaks.sh not found — is the document-writing skill installed?"
 
 
 # ── helpers ──────────────────────────────────────────────────────
@@ -63,6 +64,8 @@ def _run_fixes(output: Path) -> None:
         result = subprocess.run(
             cmd, check=False, capture_output=True, timeout=30, text=True
         )
+    except FileNotFoundError:
+        raise FileNotFoundError(FIX_SCRIPT_MSG)
     except subprocess.TimeoutExpired:
         raise RuntimeError("fix-pandoc-leaks timeout after 30s")
     if result.returncode != 0:

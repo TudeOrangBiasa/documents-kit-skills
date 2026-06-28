@@ -154,6 +154,22 @@ class TestBuildDocx:
         with pytest.raises(RuntimeError, match="timeout.*30"):
             build_docx(fake_md, fake_bib, fake_output)
 
+    def test_fixes_script_missing_raises_file_not_found(
+        self, mock_run, mock_validate_true, fake_md, fake_bib, fake_output
+    ):
+        """FileNotFoundError from missing fix-pandoc-leaks.sh wrapped with clear message."""
+        mock_run.side_effect = [
+            subprocess.CompletedProcess(
+                args=[], returncode=0, stdout="", stderr=""
+            ),  # pandoc succeeds
+            FileNotFoundError("fix-pandoc-leaks.sh"),
+        ]
+
+        from tools.pandoc_citeproc import build_docx
+
+        with pytest.raises(FileNotFoundError, match="document-writing skill"):
+            build_docx(fake_md, fake_bib, fake_output)
+
     def test_md_path_missing_raises(
         self, mock_run, mock_validate_true, fake_bib, fake_output
     ):
